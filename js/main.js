@@ -4,6 +4,15 @@ const students = page.querySelectorAll('.student-item');
 const pageHeader = page.querySelector('.page-header');
 const pageSize = 10;
 
+// Utility functions
+// Clears an html node of children
+function clearHTML(parentNode) {
+  while (parentNode.firstChild) {
+    parentNode.removeChild(parentNode.firstChild);
+  }
+}
+// END utility functions
+
 // Takes an array and returns an object with a number of pages containing no more than "pageSize" items
 // Returned obj also contains total number of pages
 function populatePages(list) {
@@ -25,12 +34,18 @@ function populatePages(list) {
 function addPaginationBlock(parentNode) {
   const paginationDiv = document.createElement('div');
   paginationDiv.className = 'pagination';
-  paginationDiv.appendChild(document.createElement('ul'));
+  const paginationList = document.createElement('ul');
+  paginationDiv.appendChild(paginationList);
+
   return parentNode.appendChild(paginationDiv);
 }
 
 // Adds the pagination links to the DOM
 function addPageLinks(pagesObj, parentNode) {
+  // Clear links if they already exist
+  clearHTML(parentNode);
+  const paginationList = document.createElement('ul');
+
   for (let i = 1; i <= pagesObj.numOfPages; i += 1) {
     const paginationItem = document.createElement('li');
     const paginationLink = document.createElement('a');
@@ -41,15 +56,16 @@ function addPageLinks(pagesObj, parentNode) {
     paginationLink.setAttribute('href', '#');
     paginationLink.innerText = `${i}`;
     paginationItem.appendChild(paginationLink);
-    parentNode.appendChild(paginationItem);
+    paginationList.appendChild(paginationItem);
   }
+  parentNode.appendChild(paginationList);
 }
 
 // Adds the list items for a given page to the DOM
 function loadPage(pageNum, pagesObj) {
   const studentNodes = pagesObj[`page${pageNum}`];
   // Clear out the list
-  studentList.innerHTML = '';
+  clearHTML(studentList);
 
   // Set up a cascading fade-in effect, adding 20ms delay for each list item
   let delay = 20;
@@ -64,19 +80,62 @@ function loadPage(pageNum, pagesObj) {
   });
 }
 
+// Adds a search field to the DOM
+function addSearchBlock(parentNode) {
+  const searchDiv = document.createElement('div');
+  searchDiv.className = 'student-search';
+
+  const searchInput = document.createElement('input');
+  searchInput.placeholder = 'Search for students...';
+
+  const searchBtn = document.createElement('button');
+  searchBtn.innerText = 'Search';
+
+  searchDiv.appendChild(searchInput);
+  searchDiv.appendChild(searchBtn);
+  return parentNode.appendChild(searchDiv);
+}
+
+function searchStudents(keyword) {
+  const studentArr = [...students];
+  return studentArr.filter(student => student.querySelector('h3').innerText.toLowerCase().includes(keyword) || student.querySelector('.email').innerText.toLowerCase().includes(keyword));
+}
 
 // Initial page load
 // Initialize the pages obj with array of students pulled from the html
 const pagesObj = populatePages([...students]);
-addPageLinks(pagesObj, addPaginationBlock(page));
+const paginationBlock = addPaginationBlock(page);
+const searchBlock = addSearchBlock(pageHeader);
+addPageLinks(pagesObj, paginationBlock);
 loadPage(1, pagesObj);
 
 // Event listeners
 // Pagination page selection
-page.querySelector('.pagination').addEventListener('click', (e) => {
+paginationBlock.addEventListener('click', (e) => {
   if (e.target.nodeName === 'A') {
     page.querySelector('.active').classList.remove('active');
     e.target.classList.add('active');
     loadPage(e.target.innerText, pagesObj);
+  }
+});
+
+// Search students
+searchBlock.addEventListener('click', (e) => {
+  if (e.target.nodeName === 'BUTTON') {
+    const searchText = e.target.previousElementSibling.value.toLowerCase();
+    const searchResults = searchStudents(searchText);
+
+    if (searchResults.length > 0) {
+      const searchPages = populatePages(searchResults);
+      addPageLinks(searchPages, paginationBlock);
+      loadPage(1, searchPages);
+    } else {
+      const noStudents = document.createElement('div');
+      noStudents.className = 'no-student';
+      noStudents.innerHTML = 'Sorry, no results.';
+      clearHTML(studentList);
+      clearHTML(paginationBlock);
+      studentList.appendChild(noStudents);
+    }
   }
 });
