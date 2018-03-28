@@ -10,7 +10,7 @@ function populatePages(list) {
   let pageIndex = 0;
 
   for (let i = 1; i <= pages.numOfPages; i += 1) {
-    pages[`page${i}`] = list.slice(pageIndex, (i < pages.numOfPages) ? pageIndex += pageSize : list.length - 1);
+    pages[`page${i}`] = list.slice(pageIndex, (i < pages.numOfPages) ? pageIndex += pageSize : list.length);
   }
   return pages;
 }
