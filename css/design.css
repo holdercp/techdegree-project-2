@@ -50,7 +50,13 @@ body {
 .student-item {
   border-bottom: 1px solid #eaeaea;
   margin: 0 0 20px 0;
+  opacity: 0;
   padding: 0 0 20px 0;
+  transition: all 0.4s ease-out;
+}
+
+.student-item.show {
+  opacity: 1;
 }
 
 .student-details {
