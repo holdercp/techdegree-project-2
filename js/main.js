@@ -24,7 +24,10 @@ function populatePages(list) {
   // Slice the list down by incrementing the "itemIndex" by the "pageSize"
   // Grab the remainder of items when the loop is on its last pass
   for (let i = 1; i <= pages.numOfPages; i += 1) {
-    pages[`page${i}`] = list.slice(itemIndex, (i < pages.numOfPages) ? itemIndex += pageSize : list.length);
+    pages[`page${i}`] = list.slice(
+      itemIndex,
+      i < pages.numOfPages ? (itemIndex += pageSize) : list.length,
+    );
   }
 
   return pages;
@@ -102,7 +105,15 @@ function searchStudents(keyword) {
   const studentArr = [...students];
 
   // This is reallllly long; how do I shorten this thing down?
-  return studentArr.filter(student => student.querySelector('h3').innerText.toLowerCase().includes(keyword) || student.querySelector('.email').innerText.toLowerCase().includes(keyword));
+  return studentArr.filter(student =>
+    student
+      .querySelector('h3')
+      .innerText.toLowerCase()
+      .includes(keyword) ||
+      student
+        .querySelector('.email')
+        .innerText.toLowerCase()
+        .includes(keyword));
 }
 
 // Adds a reset search button to the DOM
