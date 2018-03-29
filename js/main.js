@@ -30,7 +30,7 @@ function populatePages(list) {
   return pages;
 }
 
-// Adds the pagination div and ul to the DOM
+// Adds the pagination div to the DOM
 function addPaginationBlock(parentNode) {
   const paginationDiv = document.createElement('div');
   paginationDiv.className = 'pagination';
@@ -40,7 +40,7 @@ function addPaginationBlock(parentNode) {
   return parentNode.appendChild(paginationDiv);
 }
 
-// Adds the pagination links to the DOM
+// Adds the pagination list and links to the DOM
 function addPageLinks(pagesObj, parentNode) {
   // Clear links if they already exist
   clearHTML(parentNode);
@@ -89,6 +89,7 @@ function addSearchBlock(parentNode) {
   searchInput.placeholder = 'Search for students...';
 
   const searchBtn = document.createElement('button');
+  searchBtn.className = 'search';
   searchBtn.innerText = 'Search';
 
   searchDiv.appendChild(searchInput);
@@ -96,9 +97,20 @@ function addSearchBlock(parentNode) {
   return parentNode.appendChild(searchDiv);
 }
 
+// Searches all students' name and email for the occurences of the keyword argument
 function searchStudents(keyword) {
   const studentArr = [...students];
+
+  // This is reallllly long; how do I shorten this thing down?
   return studentArr.filter(student => student.querySelector('h3').innerText.toLowerCase().includes(keyword) || student.querySelector('.email').innerText.toLowerCase().includes(keyword));
+}
+
+// Adds a reset search button to the DOM
+function addResetSearchBtn(parentNode) {
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'reset';
+  resetBtn.innerText = 'Reset';
+  return parentNode.appendChild(resetBtn);
 }
 
 // Initial page load
@@ -106,6 +118,7 @@ function searchStudents(keyword) {
 const pagesObj = populatePages([...students]);
 const paginationBlock = addPaginationBlock(page);
 const searchBlock = addSearchBlock(pageHeader);
+const searchInput = page.querySelector('input');
 addPageLinks(pagesObj, paginationBlock);
 loadPage(1, pagesObj);
 
@@ -121,15 +134,23 @@ paginationBlock.addEventListener('click', (e) => {
 
 // Search students
 searchBlock.addEventListener('click', (e) => {
-  if (e.target.nodeName === 'BUTTON') {
+  // If search button was clicked...
+  if (e.target.className === 'search') {
     const searchText = e.target.previousElementSibling.value.toLowerCase();
     const searchResults = searchStudents(searchText);
 
+    // If a value was submitted to search and there isn't a reset button, add a reset button
+    if (searchText && !page.querySelector('.reset')) {
+      addResetSearchBtn(searchBlock);
+    }
+
+    // Load the search results if there are any
     if (searchResults.length > 0) {
       const searchPages = populatePages(searchResults);
       addPageLinks(searchPages, paginationBlock);
       loadPage(1, searchPages);
     } else {
+      // Else inform users there are no results to display
       const noStudents = document.createElement('div');
       noStudents.className = 'no-student';
       noStudents.innerHTML = 'Sorry, no results.';
@@ -137,5 +158,21 @@ searchBlock.addEventListener('click', (e) => {
       clearHTML(paginationBlock);
       studentList.appendChild(noStudents);
     }
+  }
+
+  // If reset button was clicked, load page 1, clear search input and remove reset btn
+  if (e.target.className === 'reset') {
+    addPageLinks(pagesObj, paginationBlock);
+    loadPage(1, pagesObj);
+    searchInput.value = '';
+    e.target.remove();
+  }
+});
+
+// Pressing enter on input field triggers click on search button
+searchInput.addEventListener('keyup', (e) => {
+  e.preventDefault();
+  if (e.keyCode === 13) {
+    page.querySelector('.search').click();
   }
 });
