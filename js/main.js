@@ -37,9 +37,6 @@ function populatePages(list) {
 function addPaginationBlock(parentNode) {
   const paginationDiv = document.createElement('div');
   paginationDiv.className = 'pagination';
-  const paginationList = document.createElement('ul');
-  paginationDiv.appendChild(paginationList);
-
   return parentNode.appendChild(paginationDiv);
 }
 
